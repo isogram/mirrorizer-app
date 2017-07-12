@@ -1,32 +1,45 @@
 import React, { PropTypes } from 'react'
-import { View, ToolbarAndroid, StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native'
+import ActionBar from 'react-native-action-bar';
 
-const CustomToolbar = ({ text, ...otherProps }) => {
+
+const CustomToolbar = ({ text, onPressMenu, ...otherProps }) => {
 
   return (
-    <View style={styles.toolbarWrapper}>
-      <ToolbarAndroid
-          // actions={toolbarMenu}
-          // onActionSelected={}
-          // style={styles.toolbar}
-          title={text} />
-    </View>
+    <ActionBar
+      containerStyle={styles.bar}
+      title={'Mirrorizer'}
+      titleStyle={styles.titleBar}
+      leftIconName={'menu'}
+      leftIconContainerStyle={styles.leftIconContainer}
+      leftIconImageStyle={styles.leftIconBar}
+      onLeftPress={ onPressMenu }
+      onTitlePress={() => console.log('Title!')}
+    />
   )
 
 }
 
 const styles = StyleSheet.create({
-    toolbar: {
-        backgroundColor: '#000000',
-        height: 56,
-    },
-    toolbarWrapper: {
-        borderBottomColor: '#e0e0e0',
-        elevation: 3
-    },
-    row: {
-        flexDirection: 'row',
-    }
+  bar: {
+    backgroundColor: '#E81123',
+    height: 60
+  },
+  titleBar: {
+    fontSize: 24
+  },
+  leftIconContainer : {
+    width: 60,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  leftIconBar : {
+    width: 30,
+    height: 30,
+    resizeMode: 'contain',
+    tintColor: '#FFFFFF',
+  },
 });
 
 

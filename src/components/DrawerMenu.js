@@ -1,49 +1,72 @@
-import React, { PropTypes } from 'react'
+import React, { Component, PropTypes } from 'react'
 import { Platform, StyleSheet, View, Text, Easing } from 'react-native'
 import Drawer from 'react-native-drawer-menu';
 
 const IS_ANDROID = Platform.OS === 'android'
 
-const DrawerMenu = ({ drawerPosition, children }) => {
+export default class DrawerMenu extends Component {
 
-  var drawerContent = (<View style={styles.drawerContent}>
-      <View style={styles.leftTop}/>
-      <View style={styles.leftBottom}>
-        <View><Text>Drawer Content</Text></View>
+  static propTypes = {
+    isOpen: PropTypes.bool,
+    drawerPosition: PropTypes.string,
+    children: PropTypes.any
+  }
+
+  constructor(props) {
+    super(props);
+  }
+
+  _drawerContent = () => {
+
+    var drawerContent = (<View style={styles.drawerContent}>
+        <View style={styles.leftTop}/>
+        <View style={styles.leftBottom}>
+          <View><Text>Drawer Content</Text></View>
+        </View>
       </View>
-    </View>
-  )
+    )
 
-  return (
+    return drawerContent
 
-    <Drawer
-      style={styles.container}
-      drawerWidth={300}
-      drawerContent={drawerContent}
-      type={Drawer.types.Overlay}
-      customStyles={{drawer: styles.drawer}}
-      drawerPosition={drawerPosition}
-      onDrawerOpen={() => {console.log('Drawer is opened ss');}}
-      onDrawerClose={() => {console.log('Drawer is closed')}}
-      easingFunc={Easing.ease}
-    >
-      <View style={styles.content}>
+  }
 
-        {children}
+  componentDidUpdate(prevProps, prevState) {
 
-      </View>
+    if (this.props.isOpen) {
+      this.refs.drawer.openDrawer()
+    }
+
+  }
+
+  render () {
+
+    return (
+
+      <Drawer
+        ref={'drawer'}
+        style={styles.container}
+        drawerWidth={300}
+        drawerContent={ this._drawerContent() }
+        type={Drawer.types.Overlay}
+        customStyles={{drawer: styles.drawer}}
+        drawerPosition={this.props.drawerPosition}
+        onDrawerOpen={() => {console.log('Drawer is opened ss');}}
+        onDrawerClose={() => {console.log('Drawer is closed')}}
+        easingFunc={Easing.ease}
+      >
+        <View style={styles.content}>
+
+          {this.props.children}
+
+        </View>
 
 
-    </Drawer>
+      </Drawer>
 
-  )
+    )
+    
+  }
 }
-
-DrawerMenu.propTypes = {
-  drawerPosition: PropTypes.string,
-  children: PropTypes.any
-}
-
 
 const styles = StyleSheet.create({
   container: {
@@ -105,5 +128,3 @@ const styles = StyleSheet.create({
   mask: {}, // style of mask if it is enabled
   main: {}, // style of main board
 });
-
-export default DrawerMenu

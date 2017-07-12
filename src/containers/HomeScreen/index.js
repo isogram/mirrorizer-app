@@ -3,49 +3,54 @@ import { Text, StyleSheet, View } from 'react-native'
 
 import CustomButton from '../../components/CustomButton'
 import DrawerMenu from '../../components/DrawerMenu'
+import CustomToolbar from '../../components/CustomToolbar'
 
-import ActionBar from 'react-native-action-bar';
-
-/**
- * Just a centered logout button.
- */
 export default class HomeScreen extends Component {
   static propTypes = {
     logout: PropTypes.func
   }
 
-// in render function
-render() {
+  constructor(props) {
+    super(props)
+    menuPressed = this.menuPressed.bind(this);
+  }
 
-  return (
-    <DrawerMenu
-      drawerPosition={"left"}
-    >
+  state = {
+    isOpen: null
+  }
 
-      <View style={styles.container}>
+  menuPressed = () => {
+    this.setState({isOpen: true})
+  }
 
-        <ActionBar
-          containerStyle={styles.bar}
-          title={'React-native-action-bar Example'}
-          rightText={'Hello'}
-          leftIconName={'menu'}
-          leftIconContainerStyle={styles.leftIconContainer}
-          leftIconImageStyle={styles.leftIconBar}
-          onLeftPress={() => console.log('Left!')}
-          onTitlePress={() => console.log('Title!')}
-        />
+  // in render function
+  render() {
 
-        <CustomButton
-          text={'Logout'}
-          onPress={this.props.logout}
-          buttonStyle={styles.button}
-          textStyle={styles.buttonText}
-        />
-      </View>
+    return (
+      <DrawerMenu
+        isOpen={this.state.isOpen}
+        drawerPosition={"left"}
+      >
 
-    </DrawerMenu>
-  );
-}
+        <View style={styles.container}>
+
+          <CustomToolbar
+            ref={(r) => { this.drawer = r }}
+            text={'Mirrorizer'}
+            onPressMenu={ this.menuPressed }
+          />
+
+          <CustomButton
+            text={'Logout'}
+            onPress={this.props.logout}
+            buttonStyle={styles.button}
+            textStyle={styles.buttonText}
+          />
+        </View>
+
+      </DrawerMenu>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
@@ -60,22 +65,5 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontWeight: 'bold'
-  },
-
-  bar: {
-    backgroundColor: '#E81123',
-    height: 60
-  },
-  leftIconContainer : {
-    width: 60,
-    height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  leftIconBar : {
-    width: 30,
-    height: 30,
-    resizeMode: 'contain',
-    tintColor: '#FFFFFF',
   },
 })
