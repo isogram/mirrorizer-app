@@ -159,6 +159,6 @@ const styles = StyleSheet.create({
     marginVertical: 30
   },
   bottom: {
-    backgroundColor: '#1976D2'
+    backgroundColor: '#E81123'
   }
 })

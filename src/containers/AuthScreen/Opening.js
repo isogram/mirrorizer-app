@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 8
   },
   signInButton: {
-    backgroundColor: '#1976D2'
+    backgroundColor: '#E74856'
   },
   signInButtonText: {
     color: 'white'

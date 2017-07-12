@@ -4,6 +4,8 @@ import { Text, StyleSheet, View } from 'react-native'
 import CustomButton from '../../components/CustomButton'
 import DrawerMenu from '../../components/DrawerMenu'
 
+import ActionBar from 'react-native-action-bar';
+
 /**
  * Just a centered logout button.
  */
@@ -21,6 +23,18 @@ render() {
     >
 
       <View style={styles.container}>
+
+        <ActionBar
+          containerStyle={styles.bar}
+          title={'React-native-action-bar Example'}
+          rightText={'Hello'}
+          leftIconName={'menu'}
+          leftIconContainerStyle={styles.leftIconContainer}
+          leftIconImageStyle={styles.leftIconBar}
+          onLeftPress={() => console.log('Left!')}
+          onTitlePress={() => console.log('Title!')}
+        />
+
         <CustomButton
           text={'Logout'}
           onPress={this.props.logout}
@@ -37,7 +51,6 @@ render() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center'
   },
   button: {
@@ -47,5 +60,22 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontWeight: 'bold'
+  },
+
+  bar: {
+    backgroundColor: '#E81123',
+    height: 60
+  },
+  leftIconContainer : {
+    width: 60,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  leftIconBar : {
+    width: 30,
+    height: 30,
+    resizeMode: 'contain',
+    tintColor: '#FFFFFF',
   },
 })
