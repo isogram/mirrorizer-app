@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react'
-import { KeyboardAvoidingView, LayoutAnimation, Platform, StyleSheet, UIManager } from 'react-native'
+import { KeyboardAvoidingView, LayoutAnimation, Platform, StyleSheet, UIManager, BackHandler, Alert } from 'react-native'
 import { Image, View } from 'react-native-animatable'
+import {observer} from 'mobx-react/native'
 
 import imgLogo from '../../images/logo.png'
 import metrics from '../../config/metrics'
@@ -9,6 +10,8 @@ import Opening from './Opening'
 import SignupForm from './SignupForm'
 import LoginForm from './LoginForm'
 import ResetForm from './ResetForm'
+
+import UserStore from '../../stores/UserStore'
 
 const IMAGE_WIDTH = metrics.DEVICE_WIDTH * 0.8
 
@@ -42,6 +45,7 @@ if (Platform.OS === 'android') UIManager.setLayoutAnimationEnabledExperimental(t
  *   _hideAuthScreen then 1. calls the SignupForm.hideForm(), that hides the form buttons (zoomOut) and the form itself (fadeOut),
  *   2. fadeOut the logo, 3. tells the container that the login animation has completed and that the app is ready to show the next screen (HomeScreen).
  */
+ @observer
 export default class AuthScreen extends Component {
   static propTypes = {
     isLoggedIn: PropTypes.bool.isRequired,
@@ -54,6 +58,18 @@ export default class AuthScreen extends Component {
 
   state = {
     visibleForm: null // Can be: null | SIGNUP | LOGIN
+  }
+
+  componentWillMount(){
+    BackHandler.addEventListener('hardwareBackPress', function() {
+      Alert.alert("Konfirmasi", "Keluar dari aplikasi?",
+        [
+          {text:"Tidak", style:'cancel'},
+          {text:"Ya", onPress:()=>{BackHandler.exitApp()}}
+        ]
+      )
+     return true;
+    });
   }
 
   componentWillUpdate (nextProps) {
@@ -83,8 +99,27 @@ export default class AuthScreen extends Component {
     this.setState({ visibleForm })
   }
 
+  login(email, password){
+    UserStore.login(email, password)
+    .then((result)=>{console.log('login ', result)});
+  }
+
+  signup(email, password, fullName){
+    UserStore.register(email, password, fullName)
+    .then((result)=>{console.log('signup', result)})
+  }
+
+  resetPassword(email){
+    UserStore.resetPassword(email)
+    .then((result)=>{console.log('resetPassword', result)})
+  }
+
+
+
   render () {
-    const { isLoggedIn, isLoading, signup, login, resetPassword } = this.props
+    // const { isLoggedIn, isLoading, signup, login, resetPassword } = this.props
+    const { isLoggedIn, signup, resetPassword } = this.props;
+    const {isLoading} = UserStore;
     const { visibleForm } = this.state
     // The following style is responsible of the "bounce-up from bottom" animation of the form
     const formStyle = (!visibleForm) ? { height: 0 } : { marginTop: 40 }
@@ -114,7 +149,7 @@ export default class AuthScreen extends Component {
             <SignupForm
               ref={(ref) => this.formRef = ref}
               onLoginLinkPress={() => this._setVisibleForm('LOGIN')}
-              onSignupPress={signup}
+              onSignupPress={this.signup}
               isLoading={isLoading}
             />
           )}
@@ -123,14 +158,14 @@ export default class AuthScreen extends Component {
               ref={(ref) => this.formRef = ref}
               onSignupLinkPress={() => this._setVisibleForm('SIGNUP')}
               onResetPasswordLinkPress={() => this._setVisibleForm('RESET')}
-              onLoginPress={login}
+              onLoginPress={this.login}
               isLoading={isLoading}
             />
           )}
           {(visibleForm === 'RESET') && (
             <ResetForm
               ref={(ref) => this.formRef = ref}
-              onResetPasswordPress={resetPassword}
+              onResetPasswordPress={this.resetPassword}
               onLoginLinkPress={() => this._setVisibleForm('LOGIN')}
               isLoading={isLoading}
             />

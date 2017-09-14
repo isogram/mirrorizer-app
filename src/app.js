@@ -12,7 +12,7 @@ export class MirrorizerApp extends Component {
   state = {
     isLoggedIn: false, // Is the user authenticated?
     isLoading: false, // Is the user loggingIn/signinUp?
-    isAppReady: true // Has the app completed the login animation?
+    isAppReady: false // Has the app completed the login animation?
   }
 
   /**
