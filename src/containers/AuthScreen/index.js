@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react'
 import { KeyboardAvoidingView, LayoutAnimation, Platform, StyleSheet, UIManager, BackHandler, Alert } from 'react-native'
 import { Image, View } from 'react-native-animatable'
 import {observer} from 'mobx-react/native'
+import {Actions} from 'react-native-router-flux'
 
 import imgLogo from '../../images/logo.png'
 import metrics from '../../config/metrics'
@@ -47,14 +48,14 @@ if (Platform.OS === 'android') UIManager.setLayoutAnimationEnabledExperimental(t
  */
  @observer
 export default class AuthScreen extends Component {
-  static propTypes = {
-    isLoggedIn: PropTypes.bool.isRequired,
-    isLoading: PropTypes.bool.isRequired,
-    signup: PropTypes.func.isRequired,
-    login: PropTypes.func.isRequired,
-    resetPassword: PropTypes.func.isRequired,
-    onMirrorizerAppCompleted: PropTypes.func.isRequired // Called at the end of a succesfull login/signup animation
-  }
+  // static propTypes = {
+  //   isLoggedIn: PropTypes.bool.isRequired,
+  //   isLoading: PropTypes.bool.isRequired,
+  //   signup: PropTypes.func.isRequired,
+  //   login: PropTypes.func.isRequired,
+  //   resetPassword: PropTypes.func.isRequired,
+  //   onMirrorizerAppCompleted: PropTypes.func.isRequired // Called at the end of a succesfull login/signup animation
+  // }
 
   state = {
     visibleForm: null // Can be: null | SIGNUP | LOGIN
@@ -101,7 +102,17 @@ export default class AuthScreen extends Component {
 
   login(email, password){
     UserStore.login(email, password)
-    .then((result)=>{console.log('login ', result)});
+    .then((result)=>{
+      console.log('login ', result)
+      if(!result.error && result.result){
+        const {token, user} = result.result;
+        Actions.HomeScreen({
+          token : token,
+          user : user,
+          logout : ()=>{UserStore.logout()}
+        });
+      }
+    });
   }
 
   signup(email, password, fullName){

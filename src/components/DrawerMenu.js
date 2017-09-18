@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 import { Platform, StyleSheet, View, Text, Easing } from 'react-native'
 import Drawer from 'react-native-drawer-menu';
 
@@ -6,11 +6,11 @@ const IS_ANDROID = Platform.OS === 'android'
 
 export default class DrawerMenu extends Component {
 
-  static propTypes = {
-    isOpen: PropTypes.bool,
-    drawerPosition: PropTypes.string,
-    children: PropTypes.any
-  }
+  // static propTypes = {
+  //   isOpen: PropTypes.bool,
+  //   drawerPosition: PropTypes.string,
+  //   children: PropTypes.any
+  // }
 
   constructor(props) {
     super(props);
@@ -64,7 +64,7 @@ export default class DrawerMenu extends Component {
       </Drawer>
 
     )
-    
+
   }
 }
 
