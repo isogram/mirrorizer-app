@@ -5,7 +5,7 @@ import {Actions} from 'react-native-router-flux'
 import {observer} from 'mobx-react/native'
 
 import config from '../config';
-import UserStore from '../stores/UserStore'
+import {UserStore, FileStore} from '../stores'
 
 const logoApp = require('../images/logo.png');
 
@@ -31,26 +31,20 @@ export default class SideBar extends Component{
         </Image>
         <View style={styles.leftBottom}>
           <List>
-            <ListItem icon onPress={()=>{
-              Actions.HomeScreen();
-            }}>
+            <ListItem icon onPress={()=>{ Actions.HomeScreen() }}>
               <Left><Icon name="ios-folder-outline" style={styles.icon}/></Left>
               <Body><Text style={{color:config.themeColor}}>File</Text></Body>
             </ListItem>
-            <ListItem icon onPress={()=>{
-              Actions.Settings();
-            }}>
+            <ListItem icon onPress={()=>{ Actions.Settings() }}>
               <Left><Icon name="ios-settings-outline" style={styles.icon}/></Left>
               <Body><Text style={{color:config.themeColor}}>Settings</Text></Body>
             </ListItem>
-            <ListItem icon onPress={()=>{
-              Actions.Settings();
-            }}>
+            <ListItem icon onPress={()=>{ Actions.About() }}>
               <Left><Icon name="ios-information-circle-outline" style={styles.icon}/></Left>
               <Body><Text style={{color:config.themeColor}}>About</Text></Body>
             </ListItem>
-            <ListItem icon
-              onPress={()=>{
+            <ListItem icon onPress={()=>{
+                FileStore.clearData();
                 logout()
                 Actions.AuthScreen();
               }}

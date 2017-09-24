@@ -1,16 +1,19 @@
 import React, { Component } from 'react'
-import { Text, StyleSheet, View, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native'
+import { Text, StyleSheet, View, TouchableOpacity, ActivityIndicator, RefreshControl, BackHandler, Alert, ToastAndroid } from 'react-native'
 import {
   Container, Header, Drawer, Title, Content, List, ListItem,
   Footer, FooterTab, Button, Left, Right, Body, Icon, Fab
 } from 'native-base';
 import {observer} from 'mobx-react/native'
 import {Actions} from 'react-native-router-flux'
+import FilePicker from '../../utils/FilePicker'
 
 import SideBar from '../../components/SideBar'
 import Menu from './Menu'
 import InputAddUpdate from './InputAddUpdate'
 import config from '../../config';
+
+const LIMIT_PAGE = 100;
 
 @observer
 export default class HomeScreen extends Component {
@@ -30,49 +33,100 @@ export default class HomeScreen extends Component {
   }
 
   componentWillMount(){
-    const {store, token} = this.props;
-    // this.refreshData(store, token);
+    const {store, token, parent_id, objDetail, useLocal} = this.props;
+    store.list(token, parent_id, objDetail, 0, LIMIT_PAGE, true);
 
     this.arMenu = [
-      {name : "Unggah File", icon : "ios-cloud-upload-outline", action : ()=>{}},
+      {name : "Unggah File", icon : "ios-cloud-upload-outline", action : ()=>{
+        FilePicker((res)=>{
+          console.log('response FilePicker', res, this);
+          if(res.error){
+            ToastAndroid.show(res.message, ToastAndroid.SHORT);
+          }else{
+            this.state.showMenu = false;
+            store.uploadFile(token, res.file, objDetail.directory_id, parent_id);
+          }
+        });
+      }},
       {name : "Buat Folder", icon : "ios-folder-outline", action : ()=>{
         this.setState({
-          showInputAddUpdate : true,
-          itemSelected : {type : 'dir', name:"", rename:false},
-          showMenu : false
+          showInputAddUpdate : true, showMenu : false,
+          itemSelected : {type : 'dir', name : "", rename : false,
+            action : (name)=>{ store.createDir(token, parent_id, name) }
+          }
         })
       }}
     ]
     this.arMenuItemFolder = [
       {name : "Ganti nama", icon : "ios-create-outline", action : ()=>{
-        this.setState({showInputAddUpdate : true});
+        this.setState({ showInputAddUpdate : true, showMenuItem : false });
       }},
-      {name : "Hapus", icon : "ios-trash-outline", action : ()=>{}}
+      {name : "Hapus", icon : "ios-trash-outline", action : ()=>{
+        this.state.showMenuItem = false;
+        this.state.itemSelected.actionRemove();
+      }}
     ]
     this.arMenuItemFile = [
       {name : "Ganti nama", icon : "ios-create-outline", action : ()=>{
         let item = this.state.itemSelected;
         item.rename = true;
-        this.setState({
-          showInputAddUpdate : true,
-          itemSelected : item,
-          showMenuItem : false
-        })
+        this.setState({ showInputAddUpdate : true, itemSelected : item, showMenuItem : false })
       }},
-      {name : "Pindahkan", icon : "ios-redo-outline", action : ()=>{}},
-      {name : "Hapus", icon : "ios-trash-outline", action : ()=>{}}
+      {name : "Pindahkan", icon : "ios-redo-outline", action : ()=>{
+        Actions.MoveFile({objMove : this.state.itemSelected})
+      }},
+      {name : "Hapus", icon : "ios-trash-outline", action : ()=>{
+        this.state.showMenuItem = false;
+        this.state.itemSelected.actionRemove();
+      }}
     ]
+
+    BackHandler.addEventListener('hardwareBackPress', function() {
+      const parent_id = objDetail.parent_id;
+      if(objDetail.directory_id == '0'){
+        Alert.alert("Konfirmasi", "Keluar dari aplikasi?",
+          [
+            {text:"Tidak", style:'cancel'},
+            {text:"Ya", onPress:()=>{BackHandler.exitApp()}}
+          ]
+        )
+      }else{
+        const objDetail = store.data[parent_id].objDetail;
+        Actions.HomeScreen({parent_id : parent_id, objDetail : objDetail, useLocal : true})
+      }
+     return true;
+    });
   }
 
-  refreshData(store, token){
-    store.list(token, 0, 0, 100);
+  // in render function
+  render() {
+    const {store, token, user, logout, parent_id, objDetail, useLocal} = this.props;
+    const {isLoading, dataShow} = store;
+    console.log('storeFile', store);
+    return (
+      <Container>
+        {this.renderHeader(objDetail.name)}
+        <Content style={{backgroundColor:'#FFF'}}
+          refreshControl={
+            <RefreshControl
+              refreshing={isLoading}
+              onRefresh={()=>{ store.list(token, parent_id, objDetail, 0, LIMIT_PAGE, false) }}
+            />}
+        >
+          <List
+            dataArray={dataShow.slice()}
+            renderRow={this.renderRow.bind(this)}
+            >
+          </List>
+        </Content>
+        { this.renderMenu() }
+        { this.renderMenuItem() }
+        { this.renderInputAddUpdate() }
+      </Container>
+    );
   }
 
-  menuPressed = () => {
-    this.drawer._root.open()
-  }
-
-  renderHeader(){
+  renderHeader(title){
     return(
       <Header>
         <Left>
@@ -81,16 +135,16 @@ export default class HomeScreen extends Component {
           </Button>
         </Left>
         <Body>
-          <Title>Mirrorizer</Title>
+          <Title>{title}</Title>
         </Body>
         <Right />
       </Header>
     )
   }
 
-  renderRow(data, iter){
+  renderRow(data, section, iter){
     if(!data){return null}
-    const {name, parent_id, type} = data;
+    const {name, parent_id, type, directory_id, upload_id} = data;
     const icon = type == 'dir' ? "ios-folder-outline" : "ios-document-outline";
 
     return(
@@ -99,11 +153,28 @@ export default class HomeScreen extends Component {
           <Icon name={icon} style={styles.icon}/>
         </Left>
         <Body>
-          <Text style={{color:config.themeColor}} numberOfLines={2}>{name}</Text>
+          <TouchableOpacity
+            onPress={()=>{Actions.HomeScreen({parent_id : directory_id, objDetail : data})}}>
+            <Text style={{color:config.themeColor}} numberOfLines={2}>{name}</Text>
+          </TouchableOpacity>
         </Body>
         <Right >
           <TouchableOpacity
-            onPress={()=>{ this.setState({showMenuItem:true, itemSelected:data}) }}
+            onPress={()=>{
+              const {store, token} = this.props;
+              const itemSelected = {
+                type : type, name : name, rename : true, index : iter, parent_id : parent_id, directory_id : directory_id, upload_id : upload_id,
+                action : (name)=>{
+                  type == 'dir' ? store.renameDir(token, directory_id, parent_id, iter, name) :
+                          store.renameFile(token, upload_id, directory_id, iter, name)
+                 },
+                actionRemove : ()=>{ console.log('actionRemove', type);
+                  type == 'dir' ? store.removeDir(token, directory_id, parent_id, iter) :
+                          store.removeFile(token, upload_id, directory_id, iter);
+                }
+              }
+              this.setState({ showMenuItem:true, itemSelected: itemSelected })
+            }}
           >
             <Icon name="ios-arrow-dropdown" style={styles.icon}/>
           </TouchableOpacity>
@@ -144,43 +215,18 @@ export default class HomeScreen extends Component {
   renderInputAddUpdate(){
     const {showInputAddUpdate, itemSelected} = this.state;
     if(showInputAddUpdate && itemSelected){
-      const {type, name, rename} = itemSelected;
+      const {type, name, rename, action} = itemSelected;
       let title = (type == 'dir' ? "folder" : "file");
       return <InputAddUpdate
-        title={rename ? "Ganti nama "+title : "Buat "+title+" baru"}
+        title={rename ? "Ganti nama "+title+" "+name : "Buat "+title+" baru"}
+        valueInput={name}
         labelHide="BATALKAN" labelProces = {rename ? "GANTI NAMA" : "BUAT"}
         actionHide={()=>{this.setState({showInputAddUpdate:false})}}
-        actionProces={()=>{}} />
+        actionProces={action} />
     }
     return null;
   }
 
-  // in render function
-  render() {
-    const {store, token, user, logout} = this.props;
-    console.log('storeFile', store);
-    return (
-      <Container>
-        {this.renderHeader()}
-        <Content style={{backgroundColor:'#FFF'}}
-          refreshControl={
-            <RefreshControl
-              refreshing={store.isLoading}
-              onRefresh={()=>{this.refreshData(store, token)}}
-            />}
-        >
-          <List
-            dataArray={store.dataShow.slice()}
-            renderRow={this.renderRow.bind(this)}
-            >
-          </List>
-        </Content>
-        { this.renderMenu() }
-        { this.renderMenuItem() }
-        { this.renderInputAddUpdate() }
-      </Container>
-    );
-  }
 }
 
 const styles = StyleSheet.create({

@@ -14,21 +14,6 @@ export default class InputAddUpdate extends Component{
     }
   }
 
-  renderRow(menu, iter){
-    if(!menu){return null}
-    const {name, icon, action} = menu;
-    return (
-      <ListItem icon key={iter}>
-        <Left>
-          <Icon name={icon} style={styles.icon}/>
-        </Left>
-        <Body>
-          <Text style={{color:config.themeColor}} numberOfLines={2}>{name}</Text>
-        </Body>
-      </ListItem>
-    )
-  }
-
   render(){
     const {title, labelHide, labelProces, actionHide, actionProces} = this.props;
     return(
@@ -43,7 +28,7 @@ export default class InputAddUpdate extends Component{
           <Item >
             <Icon name="ios-folder-outline" style={styles.icon}/>
             <TextInput
-              onChangeText={(val)=>{this.setState({password:val})}}
+              onChangeText={(val)=>{this.setState({valueInput:val})}}
               style={{color:config.themeColor, flex:1}}
               underlineColorAndroid="transparent"
               value={this.state.valueInput}/>
@@ -51,9 +36,14 @@ export default class InputAddUpdate extends Component{
           {
             false ? <Spinner color="blue" size="small" /> :
             <View style={styles.containerButton} >
-              <Button transparent iconLeft onPress={actionHide}><Text style={{color:config.themeColor}}>{labelHide}</Text></Button>
+              <Button transparent iconLeft onPress={actionHide}>
+                <Text style={{color:config.themeColor}}>{labelHide}</Text>
+              </Button>
               <Button transparent iconLeft
-                onPress={()=>{this.handleChangeEmail(store)}}>
+                onPress={()=>{
+                  actionHide();
+                  actionProces(this.state.valueInput)
+                }}>
                 <Text style={{color:config.themeColor}}>{labelProces}</Text>
               </Button>
             </View>
