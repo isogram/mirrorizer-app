@@ -53,7 +53,7 @@ class FileStore{
     let result = {error : false, message:"", result:[]};
     for(key in arrData){
 		  if(!arrData[key]){
-        result = {error : true, message:"Data "+actionName+" belum lengkap", result:[]}
+        result = {error : true, message:"Data ("+key+") "+actionName+" belum lengkap", result:[]}
         break;
       }
 	  }
@@ -80,7 +80,7 @@ class FileStore{
   **/
   async list(token, parent_id, objDetail, page, per_page, useLocal){
     const unValidData = this.validasiData([token, (parent_id >= 0)], 'List');
-
+    console.log('on list ', token, parent_id);
     if(unValidData.error){
       return unValidData;
     }

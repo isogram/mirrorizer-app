@@ -6,12 +6,14 @@ import {
 } from 'native-base';
 import {observer} from 'mobx-react/native'
 import {Actions} from 'react-native-router-flux'
-import FilePicker from '../../utils/FilePicker'
 
+import FilePicker from '../../utils/FilePicker'
+import config from '../../config';
 import SideBar from '../../components/SideBar'
+
 import Menu from './Menu'
 import InputAddUpdate from './InputAddUpdate'
-import config from '../../config';
+import MenuLink from './MenuLink'
 
 const LIMIT_PAGE = 100;
 
@@ -27,6 +29,7 @@ export default class HomeScreen extends Component {
     this.state = {
       showMenu : false,
       showMenuItem : false,
+      showMenuLink : false,
       itemSelected : {},
       showInputAddUpdate : false
     }
@@ -92,7 +95,7 @@ export default class HomeScreen extends Component {
         )
       }else{
         const objDetail = store.data[parent_id].objDetail;
-        Actions.HomeScreen({parent_id : parent_id, objDetail : objDetail, useLocal : true})
+        Actions.HomeScreen({parent_id : parent_id, objDetail : objDetail, useLocal : true, token : token})
       }
      return true;
     });
@@ -102,6 +105,7 @@ export default class HomeScreen extends Component {
   render() {
     const {store, token, user, logout, parent_id, objDetail, useLocal} = this.props;
     const {isLoading, dataShow} = store;
+    const {showMenuLink, itemSelected} = this.state;
     console.log('storeFile', store);
     return (
       <Container>
@@ -115,15 +119,20 @@ export default class HomeScreen extends Component {
         >
           <List
             dataArray={dataShow.slice()}
-            renderRow={this.renderRow.bind(this)}
+            renderRow={(data, section, iter)=>{ return this.renderRow(data, iter, token)}}
             >
           </List>
         </Content>
+        { MenuLink(showMenuLink, itemSelected.links, this.handleHideMenuLink.bind(this))  }
         { this.renderMenu() }
         { this.renderMenuItem() }
         { this.renderInputAddUpdate() }
       </Container>
     );
+  }
+
+  handleHideMenuLink(){
+    this.setState({showMenuLink : false, itemSelected : {} })
   }
 
   renderHeader(title){
@@ -142,9 +151,9 @@ export default class HomeScreen extends Component {
     )
   }
 
-  renderRow(data, section, iter){
+  renderRow(data, iter, token){
     if(!data){return null}
-    const {name, parent_id, type, directory_id, upload_id} = data;
+    const {name, parent_id, type, directory_id, upload_id, links} = data;
     const icon = type == 'dir' ? "ios-folder-outline" : "ios-document-outline";
 
     return(
@@ -154,7 +163,14 @@ export default class HomeScreen extends Component {
         </Left>
         <Body>
           <TouchableOpacity
-            onPress={()=>{Actions.HomeScreen({parent_id : directory_id, objDetail : data})}}>
+            onPress={()=>{
+              if(type == 'dir'){
+                Actions.HomeScreen({parent_id : directory_id, objDetail : data, token : token})
+              }else{
+                this.setState({showMenuLink : true, itemSelected : data})
+              }
+            }}
+          >
             <Text style={{color:config.themeColor}} numberOfLines={2}>{name}</Text>
           </TouchableOpacity>
         </Body>

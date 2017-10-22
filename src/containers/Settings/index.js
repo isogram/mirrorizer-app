@@ -22,14 +22,7 @@ export default class Settings extends Component{
       password : ""
     }
   }
-
-  menuPressed = () => {
-    console.log('menuPressed', this.props.drawer, this.refs, this.root)
-    // this.drawer._root.open()
-    // this.props.navigation.navigate.open()
-    // Actions.get('drawer').ref.open();
-  }
-
+  
   renderHeader(){
     return(
       <Header>
