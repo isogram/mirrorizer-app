@@ -31,7 +31,7 @@ export default class SideBar extends Component{
         </Image>
         <View style={styles.leftBottom}>
           <List>
-            <ListItem icon onPress={()=>{ Actions.HomeScreen() }}>
+            <ListItem icon onPress={()=>{ Actions.HomeScreen({token:userLogin.token}) }}>
               <Left><Icon name="ios-folder-outline" style={styles.icon}/></Left>
               <Body><Text style={{color:config.themeColor}}>File</Text></Body>
             </ListItem>

@@ -46,7 +46,8 @@ export default class HomeScreen extends Component {
           if(res.error){
             ToastAndroid.show(res.message, ToastAndroid.SHORT);
           }else{
-            this.state.showMenu = false;
+            // this.state.showMenu = false;
+            this.setState({showMenu : false})
             store.uploadFile(token, res.file, objDetail.directory_id, parent_id);
           }
         });
