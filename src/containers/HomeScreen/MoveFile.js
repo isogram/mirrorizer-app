@@ -25,8 +25,15 @@ export default class MoveFile extends Component {
     BackHandler.addEventListener('hardwareBackPress', function() {
       const parent_id = objDetail.parent_id;
       if(objDetail.directory_id == '0'){
-        const {directory_id} = objMove;
-        Actions.HomeScreen({parent_id : directory_id, objDetail : objMove, useLocal : true})
+        Alert.alert("Konfirmasi", "Batal pindah file?",
+          [
+            {text:"Tidak", style:'cancel'},
+            {text:"Ya", onPress:()=>{
+              Actions.HomeScreen()
+            }}
+          ]
+        )
+
       }else{
         const objDetail = store.data[parent_id].objDetail;
         Actions.MoveFile({parent_id : parent_id, objDetail : objDetail, useLocal : true})

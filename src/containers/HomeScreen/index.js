@@ -41,13 +41,13 @@ export default class HomeScreen extends Component {
 
     this.arMenu = [
       {name : "Unggah File", icon : "ios-cloud-upload-outline", action : ()=>{
+        this.setState({showMenu : false})
         FilePicker((res)=>{
           console.log('response FilePicker', res, this);
           if(res.error){
             ToastAndroid.show(res.message, ToastAndroid.SHORT);
           }else{
             // this.state.showMenu = false;
-            this.setState({showMenu : false})
             store.uploadFile(token, res.file, objDetail.directory_id, parent_id);
           }
         });
