@@ -57,11 +57,11 @@ export default class MoveFile extends Component {
               onRefresh={()=>{ store.list(token, parent_id, objDetail, 0, LIMIT_PAGE, false) }}
             />}
         >
-          <List
-            dataArray={dataShow.slice()}
-            renderRow={this.renderRow.bind(this)}
-            >
-          </List>
+        <List
+          dataArray={dataShow.slice()}
+          renderRow={(data, section, iter)=>{ return this.renderRow(data, iter, token)}}
+         >
+        </List>
         </Content>
         { this.renderMenu() }
       </Container>
@@ -84,7 +84,7 @@ export default class MoveFile extends Component {
     )
   }
 
-  renderRow(data, section, iter){
+  renderRow(data, iter, token){
     if(!data){return null}
     const {name, parent_id, type, directory_id, upload_id} = data;
     const icon = type == 'dir' ? "ios-folder-outline" : "ios-document-outline";
@@ -97,7 +97,16 @@ export default class MoveFile extends Component {
         </Left>
         <Body>
           <TouchableOpacity
-            onPress={()=>{if(type != 'dir'){ return null } Actions.MoveFile({parent_id : directory_id, objDetail : data, useLocal : true, objMove : this.props.objMove})}}>
+            onPress={()=>{
+                if(type != 'dir'){ return null }
+                Actions.MoveFile({
+                    token: token,
+                    parent_id : directory_id,
+                    objDetail : data,
+                    useLocal : true,
+                    objMove : this.props.objMove
+                })
+            }}>
             <Text style={{color:colorText}} numberOfLines={2}>{name}</Text>
           </TouchableOpacity>
         </Body>

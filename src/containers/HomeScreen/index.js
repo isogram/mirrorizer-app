@@ -77,7 +77,7 @@ export default class HomeScreen extends Component {
         this.setState({ showInputAddUpdate : true, itemSelected : item, showMenuItem : false })
       }},
       {name : "Pindahkan", icon : "ios-redo-outline", action : ()=>{
-        Actions.MoveFile({objMove : this.state.itemSelected})
+        Actions.MoveFile({token: token, objMove : this.state.itemSelected})
       }},
       {name : "Hapus", icon : "ios-trash-outline", action : ()=>{
         this.state.showMenuItem = false;
